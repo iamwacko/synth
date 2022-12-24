@@ -12,7 +12,7 @@ use sqlx::postgres::{PgColumn, PgPoolOptions, PgRow, PgTypeInfo, PgTypeKind};
 use sqlx::{Column, Executor, Pool, Postgres, Row, TypeInfo};
 use std::collections::BTreeMap;
 use std::convert::TryFrom;
-use synth_core::schema::number_content::{F32, F64, I16, I32, I64};
+use synth_core::schema::number_content::{F32, F64, I128, I16, I32, I64};
 use synth_core::schema::{
     ArrayContent, BoolContent, Categorical, ChronoValue, ChronoValueAndFormat, ChronoValueType,
     DateTimeContent, NumberContent, ObjectContent, RangeStep, RegexContent, StringContent, Uuid,

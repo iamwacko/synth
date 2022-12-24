@@ -212,6 +212,7 @@ impl NumberContent {
             NumberContent::I16(_) => Ok(Self::i16_default_id()),
             NumberContent::I32(_) => Ok(Self::i32_default_id()),
             NumberContent::I64(_) => Ok(Self::i64_default_id()),
+            NumberContent::I128(_) => Ok(Self::i128_default_id()),
             NumberContent::F64(_) => bail!("could not transmute f64 into id"),
             NumberContent::F32(_) => bail!("could not transmute f32 into id"),
         }
@@ -235,6 +236,10 @@ impl NumberContent {
 
     pub fn i64_default_id() -> Self {
         NumberContent::I64(number_content::I64::Id(Id::default()))
+    }
+
+    pub fn i128_default_id() -> Self {
+        NumberContent::I128(number_content::I128::Id(Id::default()))
     }
 }
 
@@ -414,6 +419,13 @@ number_content!(
         Constant(i64),
         Id(crate::schema::Id<i64>),
     },
+    #[derive(PartialEq, Hash)]
+    i128[is_i128, default_i128_range] as I128 {
+        Range(RangeStep<i128>),
+        Categorical(Categorical<i128>),
+        Constant(i128),
+        Id(crate::schema::Id<i128>),
+    },
     f64[is_f64, default_f64_range] as F64 {
         Range(RangeStep<f64>),
         Constant(f64),
@@ -427,6 +439,19 @@ number_content!(
 impl Compile for NumberContent {
     fn compile<'a, C: Compiler<'a>>(&'a self, _compiler: C) -> Result<Graph> {
         let number_node = match self {
+            Self::I128(i128_content) => {
+                let random_i128 = match i128_content {
+                    number_content::I128::Range(range) => RandomI128::range(*range)?,
+                    number_content::I128::Categorical(categorical_content) => {
+                        RandomI128::categorical(categorical_content.clone())
+                    }
+                    number_content::I128::Constant(val) => RandomI128::constant(*val),
+                    number_content::I128::Id(id) => {
+                        RandomI128::incrementing(Incrementing::new_at(id.start_at.unwrap_or(1)))
+                    }
+                };
+                random_i128.into()
+            }
             Self::U64(u64_content) => {
                 let random_u64 = match u64_content {
                     number_content::U64::Range(range) => RandomU64::range(*range)?,

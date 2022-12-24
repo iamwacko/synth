@@ -15,7 +15,7 @@ use super::{
     Content, DateTimeContent, Id, NumberContent, NumberKindExt, ObjectContent, OneOfContent,
     RangeStep, StringContent, ValueKindExt,
 };
-use crate::graph::prelude::content::number_content::{I16, I32, I64};
+use crate::graph::prelude::content::number_content::{I128, I16, I32, I64};
 use crate::schema::UniqueContent;
 use num::Zero;
 
@@ -262,6 +262,17 @@ impl<N: PartialEq + Display> MergeStrategy<N, N> for OptionalMergeStrategy {
     }
 }
 
+impl MergeStrategy<number_content::I128, i128> for OptionalMergeStrategy {
+    fn try_merge(self, master: &mut number_content::I128, candidate: &i128) -> Result<()> {
+        match master {
+            number_content::I128::Range(range) => self.try_merge(range, candidate),
+            number_content::I128::Categorical(cat) => self.try_merge(cat, candidate),
+            number_content::I128::Constant(cst) => self.try_merge(cst, candidate),
+            number_content::I128::Id(id) => self.try_merge(id, candidate),
+        }
+    }
+}
+
 impl MergeStrategy<number_content::U64, u64> for OptionalMergeStrategy {
     fn try_merge(self, master: &mut number_content::U64, candidate: &u64) -> Result<()> {
         match master {
@@ -338,6 +349,14 @@ impl MergeStrategy<number_content::I16, i16> for OptionalMergeStrategy {
 impl MergeStrategy<NumberContent, Number> for OptionalMergeStrategy {
     fn try_merge(self, master: &mut NumberContent, value: &Number) -> Result<()> {
         match master {
+            NumberContent::I128(i128_contents) => {
+                if let Some(n) = value.as_i128() {
+                    self.try_merge(i28_content, &n)
+                } else {
+                    *master = i128_content.clone().upcase(value.kind())?;
+                    self.try_merge(master, value)
+                }
+            }
             NumberContent::U64(u64_content) => {
                 if let Some(n) = value.as_u64() {
                     self.try_merge(u64_content, &n)

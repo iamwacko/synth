@@ -442,6 +442,12 @@ macro_rules! number_node {
 }
 
 number_node!(
+    RandomI128 (
+        I128Range<StandardIntRangeStep<u128, i128>> as range,
+        I128Constant as constant,
+        I128Categorical as categorical,
+        Incrementing as incrementing,
+    ) for i128,
     RandomU64 (
         U64Range<StandardIntRangeStep<u64, u64>> as range,
         U64Constant as constant,
