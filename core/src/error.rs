@@ -145,23 +145,6 @@ generate_error_variants!(
     }
 );
 
-#[cfg(feature = "api")]
-impl From<ErrorKind> for tide::StatusCode {
-    fn from(kind: ErrorKind) -> Self {
-        match kind {
-            ErrorKind::NotFound => Self::NotFound,
-            ErrorKind::BadRequest => Self::BadRequest,
-            ErrorKind::Serialization | ErrorKind::Compilation | ErrorKind::Unspecified => {
-                Self::InternalServerError
-            }
-            ErrorKind::Inference => Self::BadRequest,
-            ErrorKind::Override => Self::BadRequest,
-            ErrorKind::Optionalise => Self::BadRequest,
-            ErrorKind::Conflict => Self::Conflict,
-        }
-    }
-}
-
 impl std::fmt::Display for ErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{self:?}")

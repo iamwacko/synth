@@ -1,7 +1,7 @@
 use crate::graph::prelude::content::series::SeriesVariant;
 use crate::graph::prelude::*;
 use anyhow::Result;
-use chrono::{Duration, NaiveDateTime};
+use chrono::{Duration, NaiveDateTime, DateTime};
 use std::f64::consts::PI;
 use std::ops::Add;
 
@@ -212,8 +212,8 @@ impl Generator for CyclicalSeries {
     type Return = Never;
 
     fn next<R: Rng>(&mut self, rng: &mut R) -> GeneratorState<Self::Yield, Self::Return> {
-        let start_ms = self.start.timestamp_millis();
-        let current_ms = self.current.timestamp_millis();
+        let start_ms = self.start.and_utc().timestamp_millis();
+        let current_ms = self.current.and_utc().timestamp_millis();
         let period_ms = self.period.num_milliseconds();
         let max_rate_ms = self.max_rate.num_milliseconds();
         let min_rate_ms = self.min_rate.num_milliseconds();
@@ -272,14 +272,14 @@ impl Generator for AutoCorrelatedSeries {
     type Return = Never;
 
     fn next<R: Rng>(&mut self, rng: &mut R) -> GeneratorState<Self::Yield, Self::Return> {
-        let mut current = self.constant.timestamp_millis();
+        let mut current = self.constant.and_utc().timestamp_millis();
         for i in 0..self.alpha.len() {
             let t = self.v.len();
             let delta = self.alpha.get(i).unwrap().num_milliseconds()
                 * self
                     .v
                     .get(t - i)
-                    .map(|val| val.timestamp_millis())
+                    .map(|val| val.and_utc().timestamp_millis())
                     .unwrap_or(0);
             current += delta;
         }
@@ -294,7 +294,7 @@ impl Generator for AutoCorrelatedSeries {
         }
 
         self.v
-            .push(NaiveDateTime::from_timestamp_opt(current / 1000, 0).unwrap());
+            .push(DateTime::from_timestamp(current / 1000, 0).unwrap().naive_utc());
 
         GeneratorState::Yielded(*self.v.last().unwrap())
     }

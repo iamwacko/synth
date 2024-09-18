@@ -58,18 +58,6 @@ impl From<&(dyn std::error::Error + 'static)> for UserError {
         final_error
     }
 }
-#[cfg(feature = "api")]
-impl From<UserError> for tide::Response {
-    fn from(u: UserError) -> Self {
-        let value = serde_json::to_value(&u).unwrap();
-        let status_code: tide::StatusCode = u.kind.into();
-        let mut resp = tide::Response::builder(status_code).body(value).build();
-        let as_anyhow: anyhow::Error = u.into();
-        let tide_error = tide::Error::new(status_code, as_anyhow);
-        resp.set_error(tide_error);
-        resp
-    }
-}
 
 impl std::fmt::Display for UserError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
