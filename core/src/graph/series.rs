@@ -1,7 +1,7 @@
 use crate::graph::prelude::content::series::SeriesVariant;
 use crate::graph::prelude::*;
 use anyhow::Result;
-use chrono::{Duration, NaiveDateTime, DateTime};
+use chrono::{DateTime, Duration, NaiveDateTime};
 use std::f64::consts::PI;
 use std::ops::Add;
 
@@ -293,8 +293,11 @@ impl Generator for AutoCorrelatedSeries {
             current += delta as i64;
         }
 
-        self.v
-            .push(DateTime::from_timestamp(current / 1000, 0).unwrap().naive_utc());
+        self.v.push(
+            DateTime::from_timestamp(current / 1000, 0)
+                .unwrap()
+                .naive_utc(),
+        );
 
         GeneratorState::Yielded(*self.v.last().unwrap())
     }
