@@ -1,5 +1,6 @@
 use super::prelude::*;
 
+#[allow(clippy::too_long_first_doc_paragraph)]
 /// A special [Graph] node for any type of [Content] that will produce an iterator of [Value]
 /// The special [Iterator::cycle()] can be used at the construction side when this needs to produce values endlessly.
 pub struct IterNode {
