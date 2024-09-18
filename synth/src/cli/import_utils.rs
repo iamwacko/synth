@@ -23,11 +23,10 @@ pub(crate) struct Collection {
 /// Wrapper around `FieldContent` since we cant' impl `TryFrom` on a struct in a non-owned crate
 struct FieldContentWrapper(Content);
 
-pub(crate) fn build_namespace_import<T: DataSource + SqlxDataSource>(
+pub(crate) fn build_namespace_import<T: DataSource + SqlxDataSource + Sync>(
     datasource: &T,
 ) -> Result<Namespace>
 where
-    T: Sync,
     for<'c> &'c mut T::Connection: Executor<'c, Database = T::DB>,
     String: sqlx::Type<T::DB>,
     for<'d> String: sqlx::Decode<'d, T::DB> + sqlx::Encode<'d, T::DB>,
@@ -126,7 +125,7 @@ where
         }
 
         if let Some(primary_key) = primary_keys.first() {
-            let field = FieldRef::new(&format!(
+            let field = FieldRef::new(format!(
                 "{}.content.{}",
                 table_name, primary_key.column_name
             ))?;
@@ -185,8 +184,8 @@ where
     debug!("{} foreign keys found.", foreign_keys.len());
 
     for fk in foreign_keys {
-        let from_field = FieldRef::new(&format!("{}.content.{}", fk.from_table, fk.from_column))?;
-        let to_field = FieldRef::new(&format!("{}.content.{}", fk.to_table, fk.to_column))?;
+        let from_field = FieldRef::new(format!("{}.content.{}", fk.from_table, fk.from_column))?;
+        let to_field = FieldRef::new(format!("{}.content.{}", fk.to_table, fk.to_column))?;
         let node = namespace.get_s_node_mut(&from_field)?;
         *node = Content::SameAs(SameAsContent { ref_: to_field });
     }
@@ -211,13 +210,12 @@ where
         .collect()
 }
 
-fn populate_namespace_values<T: SqlxDataSource>(
+fn populate_namespace_values<T: SqlxDataSource + Sync >(
     namespace: &mut Namespace,
     table_names: &[String],
     datasource: &T,
 ) -> Result<()>
 where
-    T: Sync,
     for<'c> &'c mut T::Connection: Executor<'c, Database = T::DB>,
     String: sqlx::Type<T::DB>,
     for<'d> String: sqlx::Encode<'d, T::DB>,
