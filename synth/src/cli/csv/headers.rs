@@ -111,9 +111,7 @@ impl CsvHeader {
                     max_length: 0,
                 })
             } else {
-                let find_index = substr
-                    .find(['.', '['])
-                    .unwrap_or(substr.len());
+                let find_index = substr.find(['.', '[']).unwrap_or(substr.len());
 
                 let key = &substr[..find_index];
 

@@ -210,7 +210,7 @@ where
         .collect()
 }
 
-fn populate_namespace_values<T: SqlxDataSource + Sync >(
+fn populate_namespace_values<T: SqlxDataSource + Sync>(
     namespace: &mut Namespace,
     table_names: &[String],
     datasource: &T,
